@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TipoQuestao {
+  MULTIPLA_ESCOLHA
+  DISSERTATIVA
+  VERDADEIRO_FALSO
+}
+
+model Usuario {
+  id_user   Int       @id @default(autoincrement())
+  nome      String
+  telefone  String?
+  email     String    @unique
+  senha     String
+  createdAt DateTime @default(now())
+
+  Questoes  Questao[]
+  Provas    Prova[]
+}
+
+model Assunto {
+  id_assunto Int       @id @default(autoincrement())
+  nome       String
+
+  Questoes   Questao[]
+}
+
+model Questao {
+  id_questao   Int          @id @default(autoincrement())
+  enunciado    String
+  tipo         TipoQuestao
+  dataCriacao  DateTime     @default(now())
+
+  id_assunto   Int
+  assunto      Assunto      @relation(fields: [id_assunto], references: [id_assunto])
+
+  id_user      Int
+  usuario      Usuario      @relation(fields: [id_user], references: [id_user])
+
+  Provas       ProvaQuestao[]
+}
+
+model Prova {
+  id_prova   Int       @id @default(autoincrement())
+  titulo     String
+  createdAt  DateTime  @default(now())
+
+  id_user    Int
+  usuario    Usuario   @relation(fields: [id_user], references: [id_user])
+
+  Questoes   ProvaQuestao[]
+}
+
+model ProvaQuestao {
+  id            Int        @id @default(autoincrement())
+  id_prova      Int
+  id_questao    Int
+  data_inclusao DateTime   @default(now())
+
+  prova         Prova      @relation(fields: [id_prova], references: [id_prova])
+  questao       Questao    @relation(fields: [id_questao], references: [id_questao])
+
+  @@unique([id_prova, id_questao])
+}
